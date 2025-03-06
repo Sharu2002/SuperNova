@@ -1,13 +1,13 @@
 package com.supernova.ai.Service.admin;
 
+import com.supernova.ai.DTO.admin.AdminLoginDto;
 import com.supernova.ai.DTO.admin.AdminSignUpDto;
 import com.supernova.ai.Entity.*;
 import com.supernova.ai.Repository.*;
 import com.supernova.ai.Repository.admin.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -55,6 +55,7 @@ public class AdminService {
         usersEntity.setEmail(adminDto.getEmail());
         usersEntity.setCreatedAt(LocalDateTime.now());
         usersEntity.setUpdatedAt(LocalDateTime.now());
+        usersEntity.setPassword(adminDto.getPassword());
 
 
         UsersEntity usersEntity1 = adminRepository.save(usersEntity);
@@ -64,6 +65,8 @@ public class AdminService {
 
         return usersEntity1;
     }
+
+
 
     private void populateRolePermissions() {
 
@@ -108,7 +111,22 @@ public class AdminService {
 
     }
 
-    public void adminLogin(){
+    public HttpStatus adminLogin(AdminLoginDto adminLoginDto){
+
+        if(adminRepository.findByEmail(adminLoginDto.getEmail()).isPresent()){
+
+            if(adminRepository.findByEmail(adminLoginDto.getEmail()).get().getPassword().equals(adminLoginDto.getPassword())){
+                return HttpStatus.OK;
+            }
+            else{
+                return HttpStatus.UNAUTHORIZED;
+            }
+        }
+
+        else{
+
+            return HttpStatus.NOT_FOUND;
+        }
 
     }
 
