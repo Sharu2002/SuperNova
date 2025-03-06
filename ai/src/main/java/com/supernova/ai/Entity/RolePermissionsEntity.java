@@ -21,4 +21,28 @@ public class RolePermissionsEntity {
     @ManyToOne
     @JoinColumn(name = "permission_id", referencedColumnName = "permission_id")
     private PermissionsEntity permission;
+
+    public RolePermissionsEntity() {
+    }
+
+    public RolePermissionsEntity(RolesEntity role, PermissionsEntity permission) {
+        this.role = role;
+        this.permission = permission;
+    }
+
+    public RolesEntity getRole() {
+        return role;
+    }
+
+    public void setRole(RolesEntity role) {
+        this.role = role;
+    }
+
+    public PermissionsEntity getPermission() {
+        return permission;
+    }
+
+    public void setPermission(PermissionsEntity permission) {
+        this.permission = permission;
+    }
 }

@@ -22,4 +22,37 @@ public class UserRolesEntity {
     @ManyToOne
     @JoinColumn(name = "team_id", referencedColumnName = "team_id")
     private TeamsEntity team;
+
+    public UserRolesEntity() {
+    }
+
+    public UserRolesEntity(UsersEntity user, RolesEntity role, TeamsEntity team) {
+        this.user = user;
+        this.role = role;
+        this.team = team;
+    }
+
+    public UsersEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UsersEntity user) {
+        this.user = user;
+    }
+
+    public RolesEntity getRole() {
+        return role;
+    }
+
+    public void setRole(RolesEntity role) {
+        this.role = role;
+    }
+
+    public TeamsEntity getTeam() {
+        return team;
+    }
+
+    public void setTeam(TeamsEntity team) {
+        this.team = team;
+    }
 }

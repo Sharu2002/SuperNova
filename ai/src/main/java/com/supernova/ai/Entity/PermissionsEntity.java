@@ -24,4 +24,46 @@ public class PermissionsEntity {
 
     @OneToMany(mappedBy = "permission")
     private Set<RolePermissionsEntity> rolePermissions = new HashSet<>();
+
+    public PermissionsEntity() {
+    }
+
+    public PermissionsEntity(Long id, String permissionName, String description, Set<RolePermissionsEntity> rolePermissions) {
+        this.id = id;
+        this.permissionName = permissionName;
+        this.description = description;
+        this.rolePermissions = rolePermissions;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getPermissionName() {
+        return permissionName;
+    }
+
+    public void setPermissionName(String permissionName) {
+        this.permissionName = permissionName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Set<RolePermissionsEntity> getRolePermissions() {
+        return rolePermissions;
+    }
+
+    public void setRolePermissions(Set<RolePermissionsEntity> rolePermissions) {
+        this.rolePermissions = rolePermissions;
+    }
 }

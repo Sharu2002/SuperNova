@@ -27,4 +27,55 @@ public class RolesEntity {
 
     @OneToMany(mappedBy = "role")
     private Set<UserRolesEntity> userRoles = new HashSet<>();
+
+    public RolesEntity() {
+    }
+
+    public RolesEntity(Long id, String roleName, String description, Set<RolePermissionsEntity> rolePermissions, Set<UserRolesEntity> userRoles) {
+        this.id = id;
+        this.roleName = roleName;
+        this.description = description;
+        this.rolePermissions = rolePermissions;
+        this.userRoles = userRoles;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Set<RolePermissionsEntity> getRolePermissions() {
+        return rolePermissions;
+    }
+
+    public void setRolePermissions(Set<RolePermissionsEntity> rolePermissions) {
+        this.rolePermissions = rolePermissions;
+    }
+
+    public Set<UserRolesEntity> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(Set<UserRolesEntity> userRoles) {
+        this.userRoles = userRoles;
+    }
 }
