@@ -1,11 +1,9 @@
-package com.supernova.ai.Controller.admin;
+package com.supernova.ai.Controller.user;
 
 import com.supernova.ai.DTO.admin.AdminLoginDto;
-import com.supernova.ai.DTO.admin.AdminSignUpDto;
-import com.supernova.ai.DTO.user.UserDto;
-import com.supernova.ai.Entity.UsersEntity;
+import com.supernova.ai.DTO.user.UserLoginDto;
 import com.supernova.ai.Repository.admin.AdminRepository;
-import com.supernova.ai.Service.admin.AdminService;
+import com.supernova.ai.Service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,25 +14,19 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 @RestController
-public class AdminController {
+public class UserController {
 
     @Autowired
     AdminRepository adminRepository;
 
     @Autowired
-    AdminService adminService;
+    UserService userService;
 
 
-    @PostMapping("/adminSignup")
-    public UsersEntity adminSignup(@RequestBody AdminSignUpDto adminSignUpDto) {
+    @PostMapping("/userLogin")
+    public ResponseEntity<String> adminLogin(@RequestBody UserLoginDto userLoginDto) throws IOException {
 
-        return adminService.adminSignup(adminSignUpDto);
-    }
-
-    @PostMapping("/adminLogin")
-    public ResponseEntity<String> adminLogin(@RequestBody AdminLoginDto adminLoginDto) throws IOException {
-
-        HttpStatus status = adminService.adminLogin(adminLoginDto);
+        HttpStatus status = userService.adminLogin(userLoginDto);
 
         if (status.isSameCodeAs(HttpStatus.OK)) {
             return ResponseEntity.status(status).body("Successfully logged in"); // Returns 401
@@ -46,14 +38,5 @@ public class AdminController {
 
 
     }
-
-
-    @PostMapping("/addUser")
-    public UsersEntity addUser(@RequestBody UserDto usersDto){
-
-        return adminService.adduser(usersDto);
-
-    }
-
 
 }

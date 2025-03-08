@@ -2,6 +2,7 @@ package com.supernova.ai.Service.admin;
 
 import com.supernova.ai.DTO.admin.AdminLoginDto;
 import com.supernova.ai.DTO.admin.AdminSignUpDto;
+import com.supernova.ai.DTO.user.UserDto;
 import com.supernova.ai.Entity.*;
 import com.supernova.ai.Repository.*;
 import com.supernova.ai.Repository.admin.AdminRepository;
@@ -37,10 +38,6 @@ public class AdminService {
         this.adminRepository = adminRepository;
     }
 
-//    public Users addUsers(Users user){
-//
-//        return usersRepository.save(user);
-//    }
 
     public UsersEntity adminSignup(AdminSignUpDto adminDto){
 
@@ -66,6 +63,47 @@ public class AdminService {
         return usersEntity1;
     }
 
+
+    public UsersEntity adduser(UserDto usersDto){
+
+        Optional<UsersEntity> existingUser = adminRepository.findByEmail(usersDto.getEmail());
+        if (existingUser.isPresent()) {
+            throw new RuntimeException("User with this email already exists!");
+        }
+
+        UsersEntity usersEntity = new UsersEntity();
+        usersEntity.setFirstName(usersDto.getFirstName());
+        usersEntity.setLastName(usersDto.getLastName());
+        usersEntity.setEmail(usersDto.getEmail());
+        usersEntity.setCreatedAt(LocalDateTime.now());
+        usersEntity.setUpdatedAt(LocalDateTime.now());
+        usersEntity.setPassword(usersDto.getPassword());
+
+        
+
+         adminRepository.save(usersEntity);
+        
+        asignRoles(usersDto);
+
+        return  usersEntity;
+    }
+
+    private void asignRoles(UserDto usersDto) {
+
+        Optional<RolesEntity> rolesEntity = rolesRepository.findByRoleName(usersDto.getRole_name());
+        Optional<UsersEntity> usersEntity = adminRepository.findByEmail(usersDto.getEmail());
+        Optional<TeamsEntity> teamsEntity = teamsRepository.findByTeamName(usersDto.getTeam_name());
+        if(rolesEntity.isPresent() && usersEntity.isPresent() && teamsEntity.isPresent()) {
+
+            UserRolesEntity userRolesEntity = new UserRolesEntity();
+            userRolesEntity.setUser(usersEntity.get());
+            userRolesEntity.setTeam(teamsEntity.get());
+            userRolesEntity.setRole(rolesEntity.get());
+
+            userRolesRepository.save(userRolesEntity);
+
+        }
+    }
 
 
     private void populateRolePermissions() {
