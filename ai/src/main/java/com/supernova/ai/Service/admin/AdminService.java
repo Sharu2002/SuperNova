@@ -2,6 +2,7 @@ package com.supernova.ai.Service.admin;
 
 import com.supernova.ai.DTO.admin.AdminLoginDto;
 import com.supernova.ai.DTO.admin.AdminSignUpDto;
+import com.supernova.ai.DTO.user.ListUsersDto;
 import com.supernova.ai.DTO.user.UserDto;
 import com.supernova.ai.Entity.*;
 import com.supernova.ai.Repository.*;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -63,6 +66,37 @@ public class AdminService {
         return usersEntity1;
     }
 
+    public List<ListUsersDto> getAllUsers(){
+
+        List<UsersEntity> usersEntities = adminRepository.findAll();
+
+        List<ListUsersDto> listUsersDtos = new ArrayList<>();
+
+
+
+        for(UsersEntity usersEntity : usersEntities){
+
+            UserRolesEntity userRolesEntity = userRolesRepository.findByUser(usersEntity).get();
+
+            System.out.println("\nUser Roles : " + userRolesEntity.getUser().getId());
+
+            RolesEntity rolesEntity = rolesRepository.findById(userRolesEntity.getRole().getId()).get();
+
+
+            TeamsEntity teamsEntity = teamsRepository.findById(userRolesEntity.getTeam().getId()).get();
+
+            ListUsersDto listUsersDto = new ListUsersDto();
+
+            listUsersDto.setUserName(usersEntity.getFirstName());
+            listUsersDto.setEmail(usersEntity.getEmail());
+            listUsersDto.setRole(rolesEntity.getRoleName());
+            listUsersDto.setTeam(teamsEntity.getTeamName());
+
+            listUsersDtos.add(listUsersDto);
+        }
+        return listUsersDtos;
+    }
+
 
     public UsersEntity adduser(UserDto usersDto){
 
@@ -79,9 +113,7 @@ public class AdminService {
         usersEntity.setUpdatedAt(LocalDateTime.now());
         usersEntity.setPassword(usersDto.getPassword());
 
-        
-
-         adminRepository.save(usersEntity);
+        adminRepository.save(usersEntity);
         
         asignRoles(usersDto);
 
@@ -104,7 +136,6 @@ public class AdminService {
 
         }
     }
-
 
     private void populateRolePermissions() {
 
@@ -165,7 +196,6 @@ public class AdminService {
 
             return HttpStatus.NOT_FOUND;
         }
-
     }
 
 
@@ -188,7 +218,6 @@ public class AdminService {
         }
 
         userRolesRepository.save(userRoles);
-
 
     }
 }
