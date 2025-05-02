@@ -1,19 +1,18 @@
 package com.supernova.ai.Service.user;
 
+import com.supernova.ai.DTO.SharedNotesEntityDto;
 import com.supernova.ai.DTO.admin.AdminLoginDto;
 import com.supernova.ai.DTO.chatDto.ChatDto;
 import com.supernova.ai.DTO.chatDto.ChatMessageDto;
 import com.supernova.ai.DTO.project.ProjectDto;
 import com.supernova.ai.DTO.user.UserLoginDto;
 import com.supernova.ai.Entity.*;
-import com.supernova.ai.Repository.ChatCountRepository;
-import com.supernova.ai.Repository.ChatRepository;
-import com.supernova.ai.Repository.DocumentRepository;
-import com.supernova.ai.Repository.ProjectsRepository;
+import com.supernova.ai.Repository.*;
 import com.supernova.ai.Repository.admin.AdminRepository;
 import com.supernova.ai.Service.session.SessionService;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -44,6 +43,9 @@ public class UserService {
 
     @Autowired
     ChatCountRepository chatCountRepository;
+
+    @Autowired
+    SharedNotesRepository sharedNotesRepository;
 
 
     public HttpStatus userLogin(UserLoginDto userLoginDto) {
@@ -190,6 +192,83 @@ public class UserService {
         }
 
         return chats.stream().toList();
+    }
+
+    public void updateNotes(String projectName, String notes) {
+
+        String email = sessionService.getAttribute("userEmail").toString();
+
+        UsersEntity usersEntity = adminRepository.findByEmail(email).get();
+
+        Long userId = usersEntity.getId();
+
+         projectRepository.updateNotes(userId, projectName, notes);
+    }
+
+    public String getNotes(String projectName) {
+
+        String email = sessionService.getAttribute("userEmail").toString();
+
+        UsersEntity usersEntity = adminRepository.findByEmail(email).get();
+
+
+        return projectRepository.findByProjectTitleAndUser(projectName,usersEntity).get().getNotes();
+    }
+
+    public SharedNotesEntity shareNotes(String projectName, String receiverEmail) {
+
+        String email = sessionService.getAttribute("userEmail").toString();
+
+        UsersEntity sender = adminRepository.findByEmail(email).get();
+
+        UsersEntity receiver = adminRepository.findByEmail(receiverEmail).get();
+
+        ProjectEntity projectEntity = projectRepository.findByProjectTitleAndUser(projectName, sender).get();
+
+        SharedNotesEntity sharedNotesEntity = new SharedNotesEntity();
+
+        sharedNotesEntity.setSenderId(sender.getId());
+        sharedNotesEntity.setProjectName(projectName);
+        sharedNotesEntity.setReceiverId(receiver.getId());
+        sharedNotesEntity.setNotes(projectEntity.getNotes());
+        sharedNotesEntity.setDate(LocalDateTime.now());
+
+
+        sharedNotesRepository.save(sharedNotesEntity);
+
+        return sharedNotesEntity;
+
+
+    }
+
+    public List<SharedNotesEntityDto> getSharedNotes() {
+
+                String email = sessionService.getAttribute("userEmail").toString();
+
+        UsersEntity user = adminRepository.findByEmail(email).get();
+
+        List<SharedNotesEntity> sharedNotesEntity = sharedNotesRepository.findByReceiverId(user.getId());
+
+        List<SharedNotesEntityDto> sharedNotesEntityDtos = new ArrayList<>();
+
+        for(SharedNotesEntity sharedNotes : sharedNotesEntity){
+
+            SharedNotesEntityDto sharedNotesEntityDto = new SharedNotesEntityDto();
+
+            sharedNotesEntityDto.setProjectName(sharedNotes.getProjectName());
+            sharedNotesEntityDto.setSharedNotesId(sharedNotes.getSharedNotesId());
+            sharedNotesEntityDto.setSenderId(sharedNotes.getSenderId());
+            sharedNotesEntityDto.setSenderName(adminRepository.findById(Math.toIntExact(sharedNotes.getSenderId())).get().getFirstName());
+            sharedNotesEntityDto.setNotes(sharedNotes.getNotes());
+            sharedNotesEntityDto.setReceiverId(sharedNotes.getReceiverId());
+            sharedNotesEntityDto.setDate(sharedNotes.getDate());
+
+            sharedNotesEntityDtos.add(sharedNotesEntityDto);
+
+
+        }
+
+        return sharedNotesEntityDtos;
     }
 
 

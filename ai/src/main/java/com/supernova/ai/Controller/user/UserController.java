@@ -1,5 +1,6 @@
 package com.supernova.ai.Controller.user;
 
+import com.supernova.ai.DTO.SharedNotesEntityDto;
 import com.supernova.ai.DTO.admin.AdminLoginDto;
 import com.supernova.ai.DTO.chatDto.ChatDto;
 import com.supernova.ai.DTO.chatDto.ChatMessageDto;
@@ -7,6 +8,7 @@ import com.supernova.ai.DTO.project.ProjectDto;
 import com.supernova.ai.DTO.user.UserLoginDto;
 import com.supernova.ai.Entity.ChatEntity;
 import com.supernova.ai.Entity.ProjectEntity;
+import com.supernova.ai.Entity.SharedNotesEntity;
 import com.supernova.ai.Repository.admin.AdminRepository;
 import com.supernova.ai.Service.session.SessionService;
 import com.supernova.ai.Service.user.UserService;
@@ -120,6 +122,30 @@ public class UserController {
 
 
         return userService.chatHistory(projectName, chatId);
+    }
+
+    @PutMapping("/updateNotes")
+    public void updateNotes(@RequestParam String notes, @RequestParam String projectName) {
+
+         userService.updateNotes(projectName , notes);
+    }
+
+    @GetMapping("/getNotes")
+    public String getNotes(@RequestParam String projectName) {
+
+        return userService.getNotes(projectName);
+    }
+
+    @PostMapping("/shareNotes")
+    public SharedNotesEntity shareNotes(@RequestParam String projectName, @RequestParam String receiverEmail) {
+
+        return userService.shareNotes(projectName, receiverEmail);
+    }
+
+    @GetMapping("/getSharedNotes")
+    public List<SharedNotesEntityDto> getSharedNotes() {
+
+        return userService.getSharedNotes();
     }
 
 

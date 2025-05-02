@@ -31,17 +31,28 @@ public class ProjectEntity {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private UsersEntity user;
 
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
     public ProjectEntity() {
     }
 
-   public ProjectEntity(Long id, String projectTitle, LocalDateTime createdAt, LocalDateTime updatedAt, UsersEntity user) {
+   public ProjectEntity(Long id, String projectTitle, LocalDateTime createdAt, LocalDateTime updatedAt, UsersEntity user, String notes) {
         this.id = id;
         this.projectTitle = projectTitle;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.user = user;
+        this.notes = notes;
     }
 
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
 
     public Long getId() {
         return id;

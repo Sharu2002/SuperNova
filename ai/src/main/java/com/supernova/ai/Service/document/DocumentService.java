@@ -47,27 +47,22 @@ public class DocumentService {
 
     public void upload(MultipartFile file , String projectName) throws IOException {
 
-        UsersEntity usersEntity = adminRepository.findByEmail(sessionService.getAttribute("userEmail").toString()).get();
 
-        ProjectEntity projectEntity = projectsRepository.findByProjectTitle(projectName).get();
 
-        DocumentEntity documentEntity = new DocumentEntity();
 
-        documentEntity.setUser(usersEntity);
-        documentEntity.setProject(projectEntity);
-        documentEntity.setTitle(file.getOriginalFilename());
-        documentEntity.setCreatedAt(LocalDateTime.now());
-        documentEntity.setUpdatedAt(LocalDateTime.now());
-
-        DocumentEntity document =  documentRepository.save(documentEntity);
-
-        processPdfFile(file, document.getDocumentId());
+        processPdfFile(file,projectName);
     }
 
 
 
 
-    public void processPdfFile(MultipartFile file, Long docId) throws IOException {
+    public void processPdfFile(MultipartFile file, String projectName) throws IOException {
+
+        UsersEntity usersEntity = adminRepository.findByEmail(sessionService.getAttribute("userEmail").toString()).get();
+
+        ProjectEntity projectEntity = projectsRepository.findByProjectTitle(projectName).get();
+
+
 
         // Create a temporary file to store the uploaded PDF
         Path tempFile = Files.createTempFile("uploaded_pdf_", ".pdf");
@@ -79,6 +74,29 @@ public class DocumentService {
         PdfDocumentReaderConfig config = PdfDocumentReaderConfig.builder().withPagesPerDocument(1).build();
 
         PagePdfDocumentReader pdfReader = new PagePdfDocumentReader(pdfResource, config);
+
+        List<Document> docList = pdfReader.get();
+
+        // Concatenate all pages into a single string
+        StringBuilder fullContent = new StringBuilder();
+
+        for (Document doc : docList) {
+            fullContent.append(doc.getContent()).append("\n");
+        }
+
+
+
+        DocumentEntity documentEntity = new DocumentEntity();
+
+        documentEntity.setUser(usersEntity);
+        documentEntity.setProject(projectEntity);
+        documentEntity.setTitle(file.getOriginalFilename());
+        documentEntity.setContent(fullContent.toString());
+        documentEntity.setCreatedAt(LocalDateTime.now());
+        documentEntity.setUpdatedAt(LocalDateTime.now());
+
+      documentRepository.save(documentEntity);
+
         var textSplitter = new TokenTextSplitter(false);
 
 

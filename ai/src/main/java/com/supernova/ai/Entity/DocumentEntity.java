@@ -18,8 +18,7 @@ public class DocumentEntity {
     @Column(name = "title", length = 255)
     private String title;
 
-    @Lob
-    @Column(name = "content")
+    @Column(name = "content",nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne

@@ -1,12 +1,10 @@
 package com.supernova.ai.Service.rag;
 
 import com.supernova.ai.DTO.chatDto.ChatMessageDto;
-import com.supernova.ai.Entity.ChatCountEntity;
-import com.supernova.ai.Entity.ChatEntity;
-import com.supernova.ai.Entity.ProjectEntity;
-import com.supernova.ai.Entity.UsersEntity;
+import com.supernova.ai.Entity.*;
 import com.supernova.ai.Repository.ChatCountRepository;
 import com.supernova.ai.Repository.ChatRepository;
+import com.supernova.ai.Repository.DocumentRepository;
 import com.supernova.ai.Repository.ProjectsRepository;
 import com.supernova.ai.Repository.admin.AdminRepository;
 import com.supernova.ai.Service.session.SessionService;
@@ -38,6 +36,9 @@ public class RagService {
 
     @Autowired
     ChatRepository chatRepository;
+
+    @Autowired
+    DocumentRepository documentRepository;
 
     @Autowired
     ChatCountRepository chatCountRepository;
@@ -82,6 +83,65 @@ public class RagService {
         return prompt;
     }
 
+    public Prompt getArabicResponse(String query) {
+
+        List<Document> similarDocuments = vectorStore.similaritySearch(query);
+        String information = similarDocuments.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(System.lineSeparator()));
+
+        var systemPromptTemplate = new SystemPromptTemplate(
+                """
+                            استخدم فقط المعلومات التالية للإجابة على السؤال.
+                            لا تستخدم أي معلومات أخرى. إذا كنت لا تعرف، فقط أجب: غير معروف.
+                            مرحباً! سأجيب على أسئلتك باللغة العربية. يمكنك طرح سؤالك وسأساعدك بكل سرور.
+                            {information}
+                            
+                        """);
+        var systemMessage = systemPromptTemplate.createMessage(Map.of("information", information));
+        var userPromptTemplate = new PromptTemplate("{query}");
+        var userMessage = userPromptTemplate.createMessage(Map.of("query", query));
+
+        var prompt = new Prompt(List.of(systemMessage, userMessage));
+
+        return prompt;
+    }
+
+    public Prompt BrdRiskAnalyser(String query) {
+
+
+        DocumentEntity doc = documentRepository.findByTitle("BRD - Addition of review or approval levels-v1.00.pdf");
+
+        String information = doc.getContent();
+
+//        System.out.println("\n\n\n---------------CONTENT-------------\n\n\n");
+//        System.out.println(information);
+
+
+        System.out.println("\n\nHeloooooo Sharuuuuuuuuuuu");
+
+        var systemPromptTemplate = new SystemPromptTemplate(
+                """
+                        Using the below information give the Executive Summary Enhancement, Expand the current business context, Add clear quantifiable objectives and success metrics, Include estimated business impact and ROI
+                   
+                        {information}
+                        """);
+        var systemMessage = systemPromptTemplate.createMessage(Map.of("information", information));
+//        var userPromptTemplate = new PromptTemplate("{query}");
+//        var userMessage = userPromptTemplate.createMessage(Map.of("query", query));
+
+        var prompt = new Prompt(List.of(systemMessage));
+
+
+
+        return prompt;
+    }
+
+    private String aggregateContext(List<Document> documents) {
+        return documents.stream()
+                .map(Document::toString) // Convert each document to string
+                .collect(Collectors.joining("\n\n---\n\n")); // Separate chunks with dividers
+    }
 
     public void saveHistory(String query, String projectName, Long chatId, String response) {
 
