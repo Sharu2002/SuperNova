@@ -36,6 +36,18 @@ public class RagController {
         this.chatClient = chatClient;
     }
 
+    @PostMapping("/send-email")
+    public String sendEmail(@RequestParam  String emailId,@RequestParam String subject,@RequestParam String body) {
+
+        // Implement your email sending logic here
+        // You can use JavaMailSender or any other library to send emails
+
+        String message =  "Send an email to  " + emailId + " with subject: " + subject + " and body: " + body;
+
+        return callLlamaAgent(message);
+    }
+
+
 
     @GetMapping("/rag")
     public ResponseEntity<String> generateAnswer(@RequestParam String query, @RequestParam Long chatId, @RequestParam String projectName) {
@@ -53,19 +65,43 @@ public class RagController {
 
         String response;
 
-        if (query.toLowerCase().contains("email")) {
-            // 🔁 Forward to Flask LLaMA agent
+        if (isDirectEmailInstruction(query)) {
+
+            System.out.println("\n\n\n\n\ninside\n\n\n\n\n");
+            // ⚡ Case 2: Send email directly using Flask LLaMA agent
             response = callLlamaAgent(query);
-        } else {
-            // 🧠 Standard RAG processing
-            Prompt prompt = ragService.getResponse(query);
-            response = chatClient.call(prompt).getResult().getOutput().getContent();
+            ragService.saveHistory(query, projectName, chatId, response);  // Save anyway
+            return ResponseEntity.ok("Email triggered: " + response);
         }
 
-        // 💾 Save conversation history regardless of path
+        // 🧠 Case 1: RAG followed by optional email
+        Prompt prompt = ragService.getResponse(query);
+        response = chatClient.call(prompt).getResult().getOutput().getContent();
+
         ragService.saveHistory(query, projectName, chatId, response);
 
-        return ResponseEntity.ok(response);
+        String emailResponse =response;
+        String emailId ="";
+        if (query.toLowerCase().contains("email")) {
+            // ✉️ Ask Flask agent to send the RAG answer
+
+            for(String i : query.split(" ")){
+                if(i.contains("@")){
+                    emailId = i;
+                }
+            }
+            String emailInstruction = "Send email to "+ emailId + " with body as'" + response + "' and and suitable subject";
+            System.out.println("\n\n\n\n\n\n emailInstruction : " + emailInstruction + "\n\n\n\n\n");
+            emailResponse = callLlamaAgent(emailInstruction);
+            System.out.println(" Email result: " + emailResponse);
+        }
+
+        return ResponseEntity.ok(response + " \n\n\n" + emailResponse);
+    }
+
+    public boolean isDirectEmailInstruction(String query) {
+        String lower = query.toLowerCase();
+        return lower.startsWith("send an email to");
     }
 
     public String callLlamaAgent(String userMessage) {
@@ -87,6 +123,8 @@ public class RagController {
             return "❌ Failed to get response from LLaMA email agent: " + e.getMessage();
         }
     }
+
+
 
 
 //    @PostMapping("/rag")
