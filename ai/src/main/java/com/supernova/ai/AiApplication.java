@@ -1,5 +1,6 @@
 package com.supernova.ai;
 
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,6 +20,11 @@ public class AiApplication {
 	public AiApplication(VectorStore vectorStore) {
 
 		this.vectorStore = vectorStore;
+	}
+
+	@Bean
+	QuestionAnswerAdvisor questionAnswerAdvisor() {
+		return new QuestionAnswerAdvisor(this.vectorStore);
 	}
 	@Configuration
 	@Profile("llama")

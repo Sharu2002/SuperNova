@@ -81,7 +81,7 @@ public class DocumentService {
         StringBuilder fullContent = new StringBuilder();
 
         for (Document doc : docList) {
-            fullContent.append(doc.getContent()).append("\n");
+            fullContent.append(doc.getFormattedContent()).append("\n");
         }
 
 
